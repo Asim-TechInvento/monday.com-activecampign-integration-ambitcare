@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>My First JavaScript</h1>
+
+<button type="button"
+onclick="document.getElementById('demo').innerHTML = Date()">
+Click me to display Date and Time.</button>
+
+<p id="demo"></p>
+
+</body>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    $(document).ready(function() { 
+        // setInterval(refreshPage, 5000 * 60);
+        // function refreshPage() {
+        // console.log('Working');
+        // }
+        setInterval(update, 5000 * 60);
+        function update() {
+            $.getJSON("/home", 
+            function(json){
+                console.log('Working');
+            });
+        }
+        //update();
+        }); 
+</script>
+</html> 
+
