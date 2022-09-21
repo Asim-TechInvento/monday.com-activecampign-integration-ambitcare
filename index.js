@@ -22,6 +22,7 @@ app.get('/home', (req, res) => {
 app.post("/", async function (req, res) {
   if (req.body.challenge) {
     console.log(JSON.stringify(req.body, 0, 2)); res.status(200).send(req.body);
+    sendMail('Challenge working');
   }
   else {
     try {
@@ -30,19 +31,20 @@ app.post("/", async function (req, res) {
       // insert query only 
       if (!dbo) {
         //conect to db
+        sendMail('Not connected to DB');
         return
       }
       var myobj = { baseUrl: req.baseUrl, body: req.body, headers: req.headers, rawHeaders: req.rawHeaders, host: req.host, hostname: req.hostname };
       dbo.collection("Requests").insertOne(myobj, function (err, res) {
         if (err) {
-          sendMail(err);
+          sendMail(JSON.stringify(err));
           throw err;
         }
         console.log("1 request inserted");
       });
     }
     catch (ex) {
-      sendMail(err);
+      sendMail(JSON.stringify(ex));
       console.log(ex)
     }
 
@@ -62,15 +64,15 @@ app.post("/", async function (req, res) {
           }
         }
         catch (ex) {
-          sendMail(ex);
-          console.log(ex);
+          sendMail(JSON.stringify(ex));
+          console.log(JSON.stringify(ex));
         }
 
       }
     } catch (ex) {
       console.log(ex);
       // raise an email notification
-      sendMail(ex);
+      sendMail(JSON.stringify(ex));
     }
     res.status(200).send("success");
   }
@@ -460,7 +462,7 @@ function getExternalData(eventData) {
           console.log("1 error inserted");
         }
         else {
-          sendMail(ex);
+          sendMail(JSON.stringify(ex));
           console.log(ex);
         }
       }
@@ -472,7 +474,7 @@ function getExternalData(eventData) {
         console.log("1 error inserted");
       }
       else {
-        sendMail(ex);
+        sendMail(JSON.stringify(ex));
         console.log(ex);
       }
     });

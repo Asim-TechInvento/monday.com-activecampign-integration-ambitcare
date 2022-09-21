@@ -1,3 +1,4 @@
+const sendMail = require('./testemail');
 
 var mongoClient = require('mongodb').MongoClient;
 
@@ -7,7 +8,10 @@ const connectDatabase = () => {
     var url = process.env.MONGODB_URL;
 
     mongoClient.connect(url, function(err, db) {
-      if (err) throw err;
+      if (err) {
+        sendMail('Error in DB connection')
+        throw err;
+      } 
       dbo = db.db("DBMonday");
     
     });
