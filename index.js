@@ -1,9 +1,10 @@
 const axios = require('axios');
 const express = require('express');
-const { connectDatabase } = require('./connectMongo');
+//const { connectDatabase } = require('./connectMongo');
 const sendMail = require('./testemail');
 const utility = require('./utility')
 const app = express()
+const schedule = require('node-schedule');
 require('dotenv').config()
 const port = process.env.PORT || 3000;
 app.use(express.json());
@@ -26,42 +27,12 @@ app.post("/", async function (req, res) {
   }
   else {
     try {
-      // Store Each Request in request collection
-      // params: baseUrl, body, headers, raw headers, host and hostname
-      // insert query only 
-      if (!dbo) {
-        //conect to db
-        sendMail('Not connected to DB');
-        return
-      }
-      var myobj = { baseUrl: req.baseUrl, body: req.body, headers: req.headers, rawHeaders: req.rawHeaders, host: req.host, hostname: req.hostname };
-      dbo.collection("Requests").insertOne(myobj, function (err, res) {
-        if (err) {
-          sendMail(JSON.stringify(err));
-          throw err;
-        }
-        console.log("1 request inserted");
-      });
-    }
-    catch (ex) {
-      sendMail(JSON.stringify(ex));
-      console.log(ex)
-    }
-
-    try {
       // check if pulseId is found
       if (req.body.event && req.body.event.pulseId) {
 
         try {
           // store req.body.event data in transaction collection
           getExternalData(req.body.event)
-          const res = await dbo.collection("transaction").insertOne(req.body.event);
-          if (res) {
-            console.log("1 transaction inserted");
-          }
-          else {
-            console.log("Error transaction");
-          }
         }
         catch (ex) {
           sendMail(JSON.stringify(ex));
@@ -456,27 +427,11 @@ function getExternalData(eventData) {
           // in transaction table for the triggeruuid add isError: true, errorMsg: No data found
         }
       } catch (ex) {
-        // insert in error table
-        const res = dbo.collection("Errors").insertOne(ex);
-        if (res) {
-          console.log("1 error inserted");
-        }
-        else {
-          sendMail(JSON.stringify(ex));
-          console.log(ex);
-        }
+        sendMail(ex);
       }
     })
     .catch(function (error) {
-      // insert in error table
-      const res = dbo.collection("Errors").insertOne(ex);
-      if (res) {
-        console.log("1 error inserted");
-      }
-      else {
-        sendMail(JSON.stringify(ex));
-        console.log(ex);
-      }
+      sendMail(error);
     });
 }
 
@@ -508,6 +463,10 @@ app.get("/", function (req, res) {
 
 app.listen(port, (err) => {
   if (err) console.error(err);
-  connectDatabase()
+  //connectDatabase()
   console.log(`Server listnening on ${port}`);
+})
+
+schedule.scheduleJob('*/2 * * * *', async function () {
+   console.log("scheduler called")
 })
