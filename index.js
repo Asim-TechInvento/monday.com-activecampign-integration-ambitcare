@@ -505,5 +505,5 @@ app.get("/", function (req, res) {
 app.listen(port, (err) => {
   if (err) console.error(err);
   connectDatabase()
-  console.log(`Server listnening on port 3000`);
+  console.log(`Server listnening on ${port}`);
 })
