@@ -5,7 +5,7 @@ const sendMail = require('./testemail');
 const utility = require('./utility')
 const app = express()
 require('dotenv').config()
-const port = process.env.PORT || 4400;
+const port = process.env.PORT || 3000;
 app.use(express.json());
 
 // For parsing application/x-www-form-urlencoded
@@ -17,60 +17,65 @@ app.get('/home', (req, res) => {
   res.status(200).send('Success')
 })
 
-app.post("/", function(req, res) { console.log(JSON.stringify(req.body, 0, 2)); res.status(200).send(req.body);})
+// app.post("/", function(req, res) { console.log(JSON.stringify(req.body, 0, 2)); res.status(200).send(req.body);})
 
-// app.post("/", async function (req, res) {
-  
-//     try {
-//       // Store Each Request in request collection
-//       // params: baseUrl, body, headers, raw headers, host and hostname
-//       // insert query only 
-//       if (!dbo) {
-//         //conect to db
-//         return
-//       }
-//       var myobj = { baseUrl: req.baseUrl, body: req.body, headers: req.headers, rawHeaders: req.rawHeaders, host: req.host, hostname: req.hostname };
-//       dbo.collection("Requests").insertOne(myobj, function (err, res) {
-//         if (err) {
-//           sendMail(err);
-//           throw err;
-//         }
-//         console.log("1 request inserted");
-//       });
-//     }
-//     catch (ex) {
-//       sendMail(err);
-//       console.log(ex)
-//     }
+app.post("/", async function (req, res) {
+  if (req.body.challenge) {
+    console.log(JSON.stringify(req.body, 0, 2)); res.status(200).send(req.body);
+  }
+  else {
+    try {
+      // Store Each Request in request collection
+      // params: baseUrl, body, headers, raw headers, host and hostname
+      // insert query only 
+      if (!dbo) {
+        //conect to db
+        return
+      }
+      var myobj = { baseUrl: req.baseUrl, body: req.body, headers: req.headers, rawHeaders: req.rawHeaders, host: req.host, hostname: req.hostname };
+      dbo.collection("Requests").insertOne(myobj, function (err, res) {
+        if (err) {
+          sendMail(err);
+          throw err;
+        }
+        console.log("1 request inserted");
+      });
+    }
+    catch (ex) {
+      sendMail(err);
+      console.log(ex)
+    }
 
-//     try {
-//       // check if pulseId is found
-//       if (req.body.event && req.body.event.pulseId) {
+    try {
+      // check if pulseId is found
+      if (req.body.event && req.body.event.pulseId) {
 
-//         try {
-//           // store req.body.event data in transaction collection
-//           getExternalData(req.body.event)
-//           const res = await dbo.collection("transaction").insertOne(req.body.event);
-//           if (res) {
-//             console.log("1 transaction inserted");
-//           }
-//           else {
-//             console.log("Error transaction");
-//           }
-//         }
-//         catch (ex) {
-//           sendMail(ex);
-//           console.log(ex);
-//         }
+        try {
+          // store req.body.event data in transaction collection
+          getExternalData(req.body.event)
+          const res = await dbo.collection("transaction").insertOne(req.body.event);
+          if (res) {
+            console.log("1 transaction inserted");
+          }
+          else {
+            console.log("Error transaction");
+          }
+        }
+        catch (ex) {
+          sendMail(ex);
+          console.log(ex);
+        }
 
-//       }
-//     } catch (ex) {
-//       console.log(ex);
-//       // raise an email notification
-//       sendMail(ex);
-//     }
-//     res.status(200).send("success");
-//   })
+      }
+    } catch (ex) {
+      console.log(ex);
+      // raise an email notification
+      sendMail(ex);
+    }
+    res.status(200).send("success");
+  }
+
+})
 
 
 function getExternalData(eventData) {
